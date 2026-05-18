@@ -1,0 +1,6 @@
+[jenkins]
+<jenkins-ip>	ansible_user=ansible
+[slave]
+<slave-ip>		ansible_user=ansible
+[tomcat]
+<tomcat-ip>	    ansible_user=ansible
