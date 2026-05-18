@@ -7,6 +7,7 @@ This project demonstrates a complete real-world DevOps CI/CD automation pipeline
 The pipeline automatically builds, tests, containerizes, and deploys a Java Maven application whenever code changes are pushed to GitHub using GitHub Webhooks and Jenkins Pipelines.
 
 The project focuses on:
+
 - Infrastructure Automation
 - Continuous Integration & Continuous Deployment (CI/CD)
 - Docker Containerization
@@ -62,6 +63,7 @@ The project focuses on:
 # ⚙️ Technologies Used
 
 ## DevOps Tools
+
 - Jenkins
 - Ansible
 - Docker
@@ -70,11 +72,13 @@ The project focuses on:
 - GitHub Webhooks
 
 ## Cloud & Infrastructure
+
 - Linux
 - SSH
 - Bash Scripting
 
 ## CI/CD & Automation
+
 - Jenkins Declarative Pipeline
 - Infrastructure as Code (IaC)
 - Automated Deployment
@@ -112,6 +116,10 @@ devops-cicd-automation-project/
 ├── docker/
 │   └── Dockerfile
 │
+├── shellscripts/
+│   ├── usercreate.sh
+│   └── keyscript.sh
+│
 ├── application/
 │   ├── pom.xml
 │   └── src/
@@ -130,39 +138,61 @@ devops-cicd-automation-project/
 # 🔧 Jenkins Pipeline Stages
 
 ## ✅ Checkout Source Code
+
 Pulls latest source code from GitHub repository.
 
+---
+
 ## ✅ Maven Build
+
 Builds the Java application using Maven.
 
 ```bash
 mvn clean package -DskipTests
 ```
 
+---
+
 ## ✅ Verify Artifact
+
 Verifies generated WAR artifact.
 
+---
+
 ## ✅ Docker Build
+
 Builds Docker image for application deployment.
 
 ```bash
 docker build -t fortask-app:latest .
 ```
 
+---
+
 ## ✅ Stop Existing Container
+
 Stops and removes old running container.
 
+---
+
 ## ✅ Run Docker Container
+
 Deploys updated Docker container.
 
 ```bash
 docker run -d -p 8090:8080 fortask-app:latest
 ```
 
+---
+
 ## ✅ Deploy to Remote Tomcat
+
 Copies WAR artifact to remote Tomcat server using SCP.
 
+---
+
 ## ✅ Email Notification
+
 Sends pipeline success/failure notifications automatically.
 
 ---
@@ -202,18 +232,135 @@ pipeline {
 
 ---
 
+# 🐚 Shell Scripts Used
+
+## 👤 User Creation Script
+
+This script automates Linux user creation, sudo privilege assignment, and SSH configuration.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Creating a new user..."
+
+read -rp "Enter the username: " username
+
+if [[ ! "$username" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
+    echo "Invalid username."
+    exit 1
+fi
+
+if id "$username" &>/dev/null; then
+    echo "User '$username' already exists."
+    exit 1
+fi
+
+sudo adduser "$username"
+sudo usermod -aG sudo "$username"
+
+sudo bash -c "cat > /etc/sudoers.d/$username" <<EOF
+$username ALL=(ALL:ALL) NOPASSWD:ALL
+EOF
+
+sudo chmod 440 "/etc/sudoers.d/$username"
+sudo visudo -cf "/etc/sudoers.d/$username"
+
+SSH_CONF="/etc/ssh/sshd_config.d/60-cloudimg-settings.conf"
+
+sudo mkdir -p /etc/ssh/sshd_config.d
+
+echo "PasswordAuthentication yes" | sudo tee "$SSH_CONF" >/dev/null
+
+if systemctl list-units --type=service | grep -q ssh.service; then
+    sudo systemctl restart ssh
+elif systemctl list-units --type=service | grep -q sshd.service; then
+    sudo systemctl restart sshd
+fi
+
+echo "User '$username' created successfully."
+```
+
+### Usage
+
+```bash
+git clone https://github.com/Pradeesh2007/shell.git
+chmod +x shell/usercreate.sh
+./shell/usercreate.sh
+```
+
+---
+
+## 🔑 SSH Key Copy Script
+
+This script generates SSH keys and copies them to remote servers for passwordless authentication.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Generating SSH key if it does not already exist..."
+
+KEY_PATH="${HOME}/.ssh/id_ed25519"
+
+if [[ ! -f "${KEY_PATH}" ]]; then
+    ssh-keygen -t ed25519 -f "${KEY_PATH}" -N ""
+    echo "SSH key created at ${KEY_PATH}"
+else
+    echo "SSH key already exists at ${KEY_PATH}"
+fi
+
+if [[ $# -eq 0 ]]; then
+    echo "Usage: $0 user@host1 [user@host2 ...]"
+    exit 1
+fi
+
+echo ""
+echo "Copying public key to servers..."
+
+for host in "$@"; do
+    echo "----------------------------------------"
+    echo "Copying key to: ${host}"
+    ssh-copy-id -i "${KEY_PATH}.pub" "${host}"
+    echo "Done for ${host}"
+done
+
+echo ""
+echo "All keys copied successfully."
+```
+
+### Usage
+
+```bash
+git clone https://github.com/Pradeesh2007/Shellscripts.git
+chmod +x Shellscripts/keyscript.sh
+./Shellscripts/keyscript.sh user@host
+```
+
+---
+
 # 📸 Screenshots
 
 ## Jenkins Pipeline
+
 _Add screenshot here_
+
+---
 
 ## Docker Container Running
+
 _Add screenshot here_
+
+---
 
 ## GitHub Webhook Trigger
+
 _Add screenshot here_
 
+---
+
 ## Tomcat Deployment
+
 _Add screenshot here_
 
 ---
@@ -226,17 +373,23 @@ _Add screenshot here_
 git clone https://github.com/Pradeesh2007/fortask.git
 ```
 
+---
+
 ## Build Application
 
 ```bash
 mvn clean package
 ```
 
+---
+
 ## Build Docker Image
 
 ```bash
 docker build -t fortask-app .
 ```
+
+---
 
 ## Run Docker Container
 
@@ -273,6 +426,7 @@ docker run -d -p 8090:8080 fortask-app
 # 🎯 Project Outcome
 
 Successfully implemented a fully automated end-to-end DevOps CI/CD pipeline capable of:
+
 - Continuous Integration
 - Automated Build & Deployment
 - Containerized Application Deployment
