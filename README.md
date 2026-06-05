@@ -343,25 +343,25 @@ chmod +x Shellscripts/keyscript.sh
 
 ## Jenkins Pipeline
 
-_Add screenshot here_
+![jenkins-succcess](screenshots/jenkins-success.png)
 
 ---
 
 ## Docker Container Running
 
-_Add screenshot here_
+![Docekr container](screenshots/docker-container.png)
 
 ---
 
 ## GitHub Webhook Trigger
 
-_Add screenshot here_
+![Github Triggers](screenshots/webhook-trigger.png)
 
 ---
 
 ## Tomcat Deployment
 
-_Add screenshot here_
+_![Tomcat Deployment](screenshots/tomcat-deployment.png)
 
 ---
 
