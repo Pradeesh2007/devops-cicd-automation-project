@@ -14,6 +14,8 @@ The project focuses on:
 - Remote Deployment Automation
 - DevOps Best Practices
 
+## Architecture Diagram:
+![diagram](architecture-diagram/cicd-architecture.png)
 ---
 
 # 🏗️ Infrastructure Architecture
